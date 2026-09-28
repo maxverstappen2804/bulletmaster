@@ -1,0 +1,768 @@
+<!DOCTYPE html>
+<html lang="en" class="dark">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>BULLET MASTER // Viral Tachometer & News Intelligence</title>
+  
+  <!-- Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Chakra+Petch:ital,wght@0,400;0,600;0,700;1,700&family=Inter:wght@300;400;500;600;700;800&family=Orbitron:wght@500;700;900&family=JetBrains+Mono:wght@400;600;800&display=swap" rel="stylesheet">
+  
+  <!-- Tailwind CDN -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = {
+      darkMode: 'class',
+      theme: {
+        extend: {
+          fontFamily: {
+            sans: ['Inter', 'sans-serif'],
+            mono: ['JetBrains Mono', 'monospace'],
+            display: ['Chakra Petch', 'sans-serif'],
+            gauge: ['Orbitron', 'sans-serif'],
+          },
+          colors: {
+            cyber: {
+              black: '#07090e',
+              dark: '#0c0f17',
+              card: '#121722',
+              cardBorder: '#1e2638',
+              cyan: '#00f2fe',
+              neonBlue: '#4facfe',
+              redline: '#ff0844',
+              orange: '#ff6a00',
+              yellow: '#ffb703',
+              green: '#00f59b',
+            }
+          },
+          boxShadow: {
+            'neon-cyan': '0 0 25px rgba(0, 242, 254, 0.45)',
+            'neon-red': '0 0 25px rgba(255, 8, 68, 0.55)',
+            'neon-orange': '0 0 20px rgba(255, 106, 0, 0.4)',
+            'gauge-glow': 'inset 0 0 50px rgba(0, 242, 254, 0.2), 0 0 40px rgba(0, 242, 254, 0.3)',
+          }
+        }
+      }
+    }
+  </script>
+
+  <!-- Lucide Icons CDN -->
+  <script src="https://unpkg.com/lucide@latest"></script>
+
+  <!-- Custom CSS -->
+  <link rel="stylesheet" href="css/style.css">
+</head>
+<body class="bg-cyber-black text-slate-100 min-h-screen selection:bg-cyber-cyan selection:text-black font-sans antialiased overflow-x-hidden">
+
+  <!-- Ambient Background Glow Elements -->
+  <div class="fixed inset-0 pointer-events-none z-0 overflow-hidden">
+    <div class="absolute -top-40 -left-40 w-96 h-96 bg-cyan-600/15 rounded-full blur-[140px]"></div>
+    <div class="absolute top-1/3 -right-40 w-96 h-96 bg-rose-600/15 rounded-full blur-[160px]"></div>
+    <div class="absolute bottom-0 left-1/2 -translate-x-1/2 w-[700px] h-[300px] bg-cyber-neonBlue/10 rounded-full blur-[180px]"></div>
+    <div class="carbon-grid absolute inset-0 opacity-40"></div>
+  </div>
+
+  <!-- Navigation Header -->
+  <header class="sticky top-0 z-40 backdrop-blur-xl bg-cyber-dark/80 border-b border-cyber-cardBorder transition-all duration-300">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-20 flex items-center justify-between">
+      
+      <!-- Brand Logo -->
+      <div class="flex items-center gap-3 cursor-pointer group" onclick="window.scrollTo({top:0, behavior:'smooth'})">
+        <div class="relative w-12 h-12 rounded-xl bg-gradient-to-br from-cyber-cyan to-cyber-neonBlue p-[2px] shadow-neon-cyan transition-transform group-hover:scale-105">
+          <div class="w-full h-full bg-cyber-black rounded-[10px] flex items-center justify-center relative overflow-hidden">
+            <i data-lucide="gauge" class="w-6 h-6 text-cyber-cyan group-hover:rotate-45 transition-transform duration-500"></i>
+            <div class="absolute inset-0 bg-cyber-cyan/10 animate-pulse"></div>
+          </div>
+        </div>
+        <div>
+          <div class="flex items-center gap-2">
+            <span class="font-display font-black text-2xl tracking-wider text-white uppercase flex items-center">
+              BULLET<span class="text-transparent bg-clip-text bg-gradient-to-r from-cyber-cyan to-cyber-neonBlue">MASTER</span>
+            </span>
+            <span class="px-2 py-0.5 text-[10px] font-mono font-bold tracking-widest bg-red-500/20 text-red-400 border border-red-500/30 rounded">V2.4 TACHO</span>
+          </div>
+          <p class="text-xs text-slate-400 font-mono tracking-tight flex items-center gap-1.5">
+            <span class="w-2 h-2 rounded-full bg-cyber-green animate-ping inline-block"></span>
+            VIRALITY ENGINE ONLINE // RPM METER
+          </p>
+        </div>
+      </div>
+
+      <!-- Center Telemetry Ticker -->
+      <div class="hidden md:flex items-center gap-6 px-4 py-1.5 rounded-full bg-cyber-card/70 border border-cyber-cardBorder/60 text-xs font-mono">
+        <div class="flex items-center gap-2 text-slate-300">
+          <i data-lucide="zap" class="w-3.5 h-3.5 text-cyber-yellow"></i>
+          <span>MAX REDLINE:</span>
+          <span class="text-cyber-redline font-bold font-gauge" id="navMaxRPM">9,850 RPM</span>
+        </div>
+        <span class="text-slate-600">|</span>
+        <div class="flex items-center gap-2 text-slate-300">
+          <i data-lucide="flame" class="w-3.5 h-3.5 text-cyber-orange"></i>
+          <span>ACTIVE POSTS:</span>
+          <span class="text-cyber-cyan font-bold font-gauge" id="navPostCount">0</span>
+        </div>
+      </div>
+
+      <!-- Right Header Actions -->
+      <div class="flex items-center gap-3">
+        <!-- Audio Engine Rev Toggle -->
+        <button id="audioToggleBtn" title="Toggle Rev Audio FX" class="p-2.5 rounded-xl bg-cyber-card hover:bg-cyber-cardBorder text-slate-300 hover:text-cyber-cyan border border-cyber-cardBorder transition-all flex items-center gap-1.5 text-xs font-mono">
+          <i data-lucide="volume-2" id="audioIcon" class="w-4 h-4 text-cyber-cyan"></i>
+          <span class="hidden sm:inline" id="audioStatusText">SFX: ON</span>
+        </button>
+
+        <!-- New Post (+) Button in Nav -->
+        <button id="openNewPostBtn" class="flex items-center gap-2 px-4 py-2.5 rounded-xl bg-gradient-to-r from-cyan-500 to-blue-600 hover:from-cyan-400 hover:to-blue-500 text-black font-display font-bold text-sm tracking-wide shadow-neon-cyan transition-all hover:scale-105 active:scale-95">
+          <i data-lucide="plus-circle" class="w-4 h-4 text-black stroke-[2.5]"></i>
+          <span>POST NEWS</span>
+        </button>
+
+        <!-- Developer Mode Trigger -->
+        <button id="devOptionBtn" class="p-2.5 rounded-xl bg-cyber-card hover:bg-cyber-cardBorder text-slate-400 hover:text-white border border-cyber-cardBorder transition-all flex items-center gap-2 text-xs font-mono" title="Developer Option">
+          <i data-lucide="terminal" class="w-4 h-4 text-amber-400"></i>
+          <span class="hidden lg:inline">DEVELOPER</span>
+        </button>
+
+        <!-- Admin Active Pill (Hidden initially) -->
+        <div id="adminBadge" class="hidden flex items-center gap-2 px-3 py-1.5 rounded-xl bg-red-500/20 border border-cyber-redline text-cyber-redline text-xs font-mono font-bold animate-pulse">
+          <i data-lucide="shield-alert" class="w-4 h-4"></i>
+          <span>ADMIN ACCESS</span>
+          <button id="openAdminDashBtn" class="ml-1 text-[11px] underline text-white hover:text-cyber-cyan">DASHBOARD</button>
+          <button id="logoutAdminBtn" title="Lock Admin Mode" class="ml-1 text-slate-400 hover:text-white">
+            <i data-lucide="log-out" class="w-3.5 h-3.5"></i>
+          </button>
+        </div>
+      </div>
+
+    </div>
+  </header>
+
+  <!-- Main Content Layout -->
+  <main class="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 space-y-12">
+
+    <!-- HERO SECTION & TACHOMETER COCKPIT -->
+    <section class="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
+      
+      <!-- LEFT: Dynamic Input & Viral Text Analyzer (5 Cols) -->
+      <div class="lg:col-span-5 space-y-6">
+        
+        <div class="relative bg-cyber-card/90 border border-cyber-cardBorder rounded-3xl p-6 sm:p-7 shadow-2xl backdrop-blur-md overflow-hidden group">
+          <!-- Ambient card accent -->
+          <div class="absolute top-0 right-0 w-44 h-44 bg-cyber-cyan/10 rounded-full blur-3xl -z-10 group-hover:bg-cyber-cyan/20 transition-all"></div>
+          
+          <div class="flex items-center justify-between mb-4">
+            <div class="flex items-center gap-2.5">
+              <span class="flex h-3 w-3 relative">
+                <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-cyber-cyan opacity-75"></span>
+                <span class="relative inline-flex rounded-full h-3 w-3 bg-cyber-cyan"></span>
+              </span>
+              <h2 class="font-display font-bold text-xl uppercase tracking-wider text-white">
+                VIRAL RADAR INPUT
+              </h2>
+            </div>
+            <span class="text-[11px] font-mono text-slate-400 uppercase tracking-widest bg-slate-800/80 px-2.5 py-1 rounded-md border border-slate-700">
+              PASTE ENGINE
+            </span>
+          </div>
+
+          <p class="text-sm text-slate-300 leading-relaxed mb-4">
+            Paste any viral headline, breaking news, tweet, or Reddit thread. The engine computes kinetic momentum and spins the <span class="text-cyber-cyan font-semibold">Tachometer Gauge</span> into redline.
+          </p>
+
+          <!-- Input Textarea -->
+          <div class="relative mb-4">
+            <textarea id="viralInput" rows="4" 
+              class="w-full bg-cyber-black/80 border border-cyber-cardBorder focus:border-cyber-cyan focus:ring-1 focus:ring-cyber-cyan rounded-2xl p-4 text-sm text-slate-100 placeholder-slate-500 font-mono transition-all outline-none resize-none"
+              placeholder="Paste headline, Tweet (X), Reddit post or spicy story here..."></textarea>
+            
+            <button id="clearInputBtn" class="absolute top-3 right-3 text-slate-500 hover:text-slate-300 p-1 text-xs font-mono" title="Clear text">
+              <i data-lucide="x" class="w-4 h-4"></i>
+            </button>
+          </div>
+
+          <!-- Quick Test Presets -->
+          <div class="space-y-2 mb-5">
+            <label class="text-[11px] font-mono text-slate-400 uppercase tracking-wider flex items-center gap-1">
+              <i data-lucide="sparkles" class="w-3 h-3 text-cyber-yellow"></i>
+              QUICK VIRAL PRESETS:
+            </label>
+            <div class="flex flex-wrap gap-2">
+              <button class="preset-btn px-2.5 py-1 rounded-lg bg-cyber-dark border border-slate-700/80 hover:border-cyber-cyan text-slate-300 hover:text-cyber-cyan text-xs font-mono transition-all" 
+                data-text="BREAKING: OpenAI announces fully autonomous AGI system ahead of schedule. Tech stocks skyrocket by 40% in after-hours trading!">
+                🤖 AGI Breakthrough
+              </button>
+              <button class="preset-btn px-2.5 py-1 rounded-lg bg-cyber-dark border border-slate-700/80 hover:border-cyber-cyan text-slate-300 hover:text-cyber-cyan text-xs font-mono transition-all" 
+                data-text="Elon Musk posts: 'Deleting Twitter servers tomorrow at 3AM UTC to test redundancy. Good luck everybody.' Over 2.4 million retweets in 12 minutes.">
+                🐦 Elon Chaos Tweet
+              </button>
+              <button class="preset-btn px-2.5 py-1 rounded-lg bg-cyber-dark border border-slate-700/80 hover:border-cyber-cyan text-slate-300 hover:text-cyber-cyan text-xs font-mono transition-all" 
+                data-text="r/WallStreetBets user discovers glitch in broker API that accidentally liquidated a $4 Billion hedge fund short position. Subreddit is going nuclear.">
+                🚀 WSB Nuclear Thread
+              </button>
+              <button class="preset-btn px-2.5 py-1 rounded-lg bg-cyber-dark border border-slate-700/80 hover:border-cyber-cyan text-slate-300 hover:text-cyber-cyan text-xs font-mono transition-all" 
+                data-text="Leaked GTA 6 early access build file circulating on darknet torrents with 400GB uncompressed map footage. Take-Two stock paused.">
+                🎮 GTA 6 Darknet Leak
+              </button>
+            </div>
+          </div>
+
+          <!-- Action Buttons -->
+          <div class="flex flex-col sm:flex-row gap-3 pt-2">
+            <button id="revGaugeBtn" class="flex-1 flex items-center justify-center gap-2.5 py-3.5 px-6 rounded-2xl bg-gradient-to-r from-cyber-cyan to-cyber-neonBlue hover:from-cyan-300 hover:to-blue-400 text-black font-display font-black tracking-wider text-base uppercase shadow-neon-cyan hover:scale-[1.02] active:scale-[0.98] transition-all">
+              <i data-lucide="gauge" class="w-5 h-5 text-black"></i>
+              <span>REV TACHOMETER</span>
+            </button>
+            
+            <button id="publishInputBtn" class="flex items-center justify-center gap-2 py-3.5 px-5 rounded-2xl bg-cyber-dark hover:bg-slate-800 text-slate-200 hover:text-white border border-cyber-cardBorder hover:border-slate-600 font-display font-bold text-sm tracking-wide transition-all">
+              <i data-lucide="arrow-up-right" class="w-4 h-4 text-cyber-cyan"></i>
+              <span>PUSH TO FEED</span>
+            </button>
+          </div>
+
+        </div>
+
+        <!-- Telemetry Breakdown Cards -->
+        <div class="grid grid-cols-2 gap-3">
+          <div class="bg-cyber-card/70 border border-cyber-cardBorder rounded-2xl p-4">
+            <div class="flex items-center justify-between text-slate-400 text-xs font-mono mb-1">
+              <span>EST. VELOCITY</span>
+              <i data-lucide="activity" class="w-3.5 h-3.5 text-cyber-cyan"></i>
+            </div>
+            <div class="font-gauge text-xl font-bold text-cyber-cyan" id="telemetrySpeed">0 MPH</div>
+            <div class="text-[11px] text-slate-500 font-mono mt-0.5">Spread Rate per Hour</div>
+          </div>
+
+          <div class="bg-cyber-card/70 border border-cyber-cardBorder rounded-2xl p-4">
+            <div class="flex items-center justify-between text-slate-400 text-xs font-mono mb-1">
+              <span>BULLET RATING</span>
+              <i data-lucide="shield" class="w-3.5 h-3.5 text-cyber-orange"></i>
+            </div>
+            <div class="font-display font-bold text-lg text-cyber-orange uppercase" id="telemetryBulletClass">STANDBY</div>
+            <div class="text-[11px] text-slate-500 font-mono mt-0.5">Impact Penetration</div>
+          </div>
+
+          <div class="bg-cyber-card/70 border border-cyber-cardBorder rounded-2xl p-4">
+            <div class="flex items-center justify-between text-slate-400 text-xs font-mono mb-1">
+              <span>HYPE SENTIMENT</span>
+              <i data-lucide="smile" class="w-3.5 h-3.5 text-cyber-green"></i>
+            </div>
+            <div class="font-display font-bold text-lg text-cyber-green" id="telemetrySentiment">NEUTRAL</div>
+            <div class="text-[11px] text-slate-500 font-mono mt-0.5">Vibe Frequency</div>
+          </div>
+
+          <div class="bg-cyber-card/70 border border-cyber-cardBorder rounded-2xl p-4">
+            <div class="flex items-center justify-between text-slate-400 text-xs font-mono mb-1">
+              <span>CONTROVERSY</span>
+              <i data-lucide="flame" class="w-3.5 h-3.5 text-cyber-redline"></i>
+            </div>
+            <div class="font-gauge text-xl font-bold text-cyber-redline" id="telemetryControversy">0%</div>
+            <div class="text-[11px] text-slate-500 font-mono mt-0.5">Discourse Friction</div>
+          </div>
+        </div>
+
+      </div>
+
+      <!-- RIGHT: The Dynamic Spinning Tachometer Gauge (7 Cols) -->
+      <div class="lg:col-span-7">
+        <div class="relative bg-cyber-card/90 border border-cyber-cardBorder rounded-3xl p-6 sm:p-8 shadow-2xl backdrop-blur-md overflow-hidden flex flex-col items-center">
+          
+          <!-- Top Telemetry Header -->
+          <div class="w-full flex items-center justify-between border-b border-cyber-cardBorder/80 pb-4 mb-4">
+            <div class="flex items-center gap-3">
+              <span class="px-3 py-1 rounded-full bg-cyber-black text-cyber-cyan border border-cyber-cyan/30 text-xs font-mono font-bold flex items-center gap-2">
+                <span class="w-2 h-2 rounded-full bg-cyber-cyan animate-pulse"></span>
+                LIVE TACHOMETER
+              </span>
+              <span class="text-xs font-mono text-slate-400" id="gaugeStatusText">ENGINE IDLE // AWAITING INPUT</span>
+            </div>
+
+            <!-- Redline Shift Warning Indicator -->
+            <div id="shiftLight" class="flex items-center gap-1.5 px-3 py-1 rounded-full bg-slate-900 border border-slate-700 text-slate-500 text-xs font-mono font-bold transition-all duration-150">
+              <span class="w-2 h-2 rounded-full bg-current"></span>
+              <span id="shiftLightLabel">REDLINE SHIFT</span>
+            </div>
+          </div>
+
+          <!-- THE CANVAS TACHOMETER GAUGE -->
+          <div class="relative w-full flex items-center justify-center my-2">
+            <!-- Gauge Glow Ring -->
+            <div class="relative w-[340px] h-[340px] sm:w-[420px] sm:h-[420px] max-w-full aspect-square flex items-center justify-center">
+              <canvas id="tachometerCanvas" width="500" height="500" class="w-full h-full max-w-[440px] drop-shadow-[0_0_35px_rgba(0,242,254,0.25)]"></canvas>
+
+              <!-- Central Digital RPM Readout HUD Overlay -->
+              <div class="absolute inset-0 flex flex-col items-center justify-center pointer-events-none pt-12">
+                <div class="text-[11px] font-mono tracking-widest text-slate-400 uppercase font-semibold">VIRALITY RPM</div>
+                <div class="font-gauge text-4xl sm:text-5xl font-black text-transparent bg-clip-text bg-gradient-to-b from-white via-slate-100 to-slate-400 tracking-tight" id="digitalRPM">0</div>
+                <div class="flex items-center gap-2 mt-1">
+                  <span class="text-[10px] font-mono text-cyber-cyan font-bold bg-cyber-cyan/10 px-2 py-0.5 rounded border border-cyber-cyan/20" id="digitalGear">GEAR N</span>
+                  <span class="text-[10px] font-mono text-slate-400" id="digitalPercentage">0% MAX</span>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Gauge Control Bar / Quick Simulation -->
+          <div class="w-full mt-4 pt-4 border-t border-cyber-cardBorder/80 flex flex-wrap items-center justify-between gap-3 text-xs font-mono text-slate-400">
+            <div class="flex items-center gap-2">
+              <span>THROTTLE OVERRIDE:</span>
+              <button id="revIdleBtn" class="px-2.5 py-1 rounded bg-cyber-dark hover:bg-slate-800 text-slate-300 border border-slate-700 hover:border-slate-500 transition-all">IDLE (800)</button>
+              <button id="revMidBtn" class="px-2.5 py-1 rounded bg-cyber-dark hover:bg-slate-800 text-slate-300 border border-slate-700 hover:border-slate-500 transition-all">TURBO (5500)</button>
+              <button id="revRedlineBtn" class="px-2.5 py-1 rounded bg-cyber-dark hover:bg-red-950/60 text-cyber-redline border border-red-800/60 hover:border-cyber-redline transition-all">REDLINE (9800)</button>
+            </div>
+
+            <div class="flex items-center gap-2">
+              <i data-lucide="cpu" class="w-3.5 h-3.5 text-cyber-cyan"></i>
+              <span>60 FPS KINETIC SPRING DAMPING</span>
+            </div>
+          </div>
+
+        </div>
+      </div>
+
+    </section>
+
+    <!-- LIVE VIRAL NEWS & ARTICLES FEED -->
+    <section class="space-y-6 pt-4" id="feedSection">
+      
+      <!-- Feed Controls & Filter Bar -->
+      <div class="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 bg-cyber-card/80 border border-cyber-cardBorder p-4 sm:p-5 rounded-2xl backdrop-blur-md">
+        
+        <!-- Filters -->
+        <div class="flex flex-wrap items-center gap-2" id="feedFilterTabs">
+          <button data-filter="all" class="filter-tab px-4 py-2 rounded-xl text-xs font-mono font-bold bg-cyber-cyan text-black border border-cyber-cyan shadow-neon-cyan transition-all">
+            ALL DISPATCHES (<span id="filterCountAll">0</span>)
+          </button>
+          <button data-filter="redline" class="filter-tab px-4 py-2 rounded-xl text-xs font-mono font-bold bg-cyber-dark text-slate-300 hover:text-white border border-cyber-cardBorder hover:border-cyber-redline transition-all flex items-center gap-1.5">
+            <i data-lucide="flame" class="w-3.5 h-3.5 text-cyber-redline"></i>
+            REDLINE ONLY (<span id="filterCountRedline">0</span>)
+          </button>
+          <button data-filter="twitter" class="filter-tab px-4 py-2 rounded-xl text-xs font-mono font-bold bg-cyber-dark text-slate-300 hover:text-white border border-cyber-cardBorder hover:border-cyber-cyan transition-all">
+            TWITTER / X
+          </button>
+          <button data-filter="reddit" class="filter-tab px-4 py-2 rounded-xl text-xs font-mono font-bold bg-cyber-dark text-slate-300 hover:text-white border border-cyber-cardBorder hover:border-orange-500 transition-all">
+            REDDIT
+          </button>
+          <button data-filter="news" class="filter-tab px-4 py-2 rounded-xl text-xs font-mono font-bold bg-cyber-dark text-slate-300 hover:text-white border border-cyber-cardBorder hover:border-blue-500 transition-all">
+            BREAKING NEWS
+          </button>
+        </div>
+
+        <!-- Search & Count -->
+        <div class="w-full sm:w-auto flex items-center gap-3">
+          <div class="relative w-full sm:w-64">
+            <i data-lucide="search" class="w-4 h-4 text-slate-400 absolute left-3.5 top-1/2 -translate-y-1/2"></i>
+            <input type="text" id="feedSearchInput" placeholder="Search dispatches..." 
+              class="w-full bg-cyber-black border border-cyber-cardBorder focus:border-cyber-cyan rounded-xl pl-9 pr-3 py-2 text-xs font-mono text-slate-200 outline-none transition-all">
+          </div>
+          
+          <button id="addNewsQuickBtn" class="flex items-center gap-1.5 px-3 py-2 rounded-xl bg-cyber-cyan/10 hover:bg-cyber-cyan/20 border border-cyber-cyan/30 text-cyber-cyan text-xs font-mono font-bold transition-all whitespace-nowrap">
+            <i data-lucide="plus" class="w-4 h-4"></i>
+            <span class="hidden sm:inline">ADD NEWS</span>
+          </button>
+        </div>
+
+      </div>
+
+      <!-- Feed Grid Container -->
+      <div id="newsFeedGrid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+        <!-- Dynamic Articles Injected by store.js & app.js -->
+      </div>
+
+      <!-- Empty State (Hidden) -->
+      <div id="feedEmptyState" class="hidden text-center py-16 px-4 bg-cyber-card/40 border border-dashed border-cyber-cardBorder rounded-3xl">
+        <i data-lucide="inbox" class="w-12 h-12 text-slate-600 mx-auto mb-3"></i>
+        <h3 class="font-display font-bold text-lg text-slate-300">NO DISPATCHES FOUND</h3>
+        <p class="text-xs text-slate-500 font-mono mt-1 max-w-sm mx-auto">No articles match your current filter. Click the (+) button to broadcast a new viral post.</p>
+        <button id="emptyStateAddBtn" class="mt-4 px-4 py-2 rounded-xl bg-cyber-cyan text-black font-display font-bold text-xs uppercase shadow-neon-cyan">
+          + Add First Story
+        </button>
+      </div>
+
+    </section>
+
+  </main>
+
+  <!-- FLOATING ACTION BUTTON (FAB) (+) -->
+  <div class="fixed bottom-6 right-6 z-40 group">
+    <button id="floatingAddBtn" title="Add News / Viral Article with Image" 
+      class="relative flex items-center justify-center w-16 h-16 rounded-full bg-gradient-to-tr from-cyber-cyan via-blue-500 to-cyber-neonBlue text-black shadow-neon-cyan hover:shadow-[0_0_35px_rgba(0,242,254,0.8)] transition-all duration-300 hover:scale-110 active:scale-95">
+      <i data-lucide="plus" class="w-8 h-8 text-black stroke-[3] group-hover:rotate-90 transition-transform duration-300"></i>
+      
+      <!-- Ripple ring effect -->
+      <span class="absolute inset-0 rounded-full border-2 border-cyber-cyan animate-ping opacity-60 pointer-events-none"></span>
+    </button>
+    <div class="absolute bottom-full right-0 mb-2 hidden group-hover:block whitespace-nowrap bg-cyber-black text-cyber-cyan text-xs font-mono font-bold px-3 py-1.5 rounded-lg border border-cyber-cyan/40 shadow-xl pointer-events-none">
+      + NEW ARTICLE WITH IMAGE
+    </div>
+  </div>
+
+  <!-- ================= MODALS ================= -->
+
+  <!-- 1. ADD NEWS / ARTICLE MODAL -->
+  <div id="addNewsModal" class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-md hidden transition-opacity">
+    <div class="relative w-full max-w-2xl bg-cyber-card border border-cyber-cardBorder rounded-3xl p-6 sm:p-8 shadow-2xl overflow-y-auto max-h-[90vh]">
+      
+      <!-- Header -->
+      <div class="flex items-center justify-between pb-4 mb-4 border-b border-cyber-cardBorder">
+        <div class="flex items-center gap-3">
+          <div class="p-2.5 rounded-xl bg-cyber-cyan/10 border border-cyber-cyan/30 text-cyber-cyan">
+            <i data-lucide="newspaper" class="w-5 h-5"></i>
+          </div>
+          <div>
+            <h3 class="font-display font-bold text-xl uppercase tracking-wider text-white">BROADCAST NEW ARTICLE</h3>
+            <p class="text-xs font-mono text-slate-400">Add viral story with custom image & tachometer telemetry</p>
+          </div>
+        </div>
+        <button id="closeAddNewsModalBtn" class="text-slate-400 hover:text-white p-2 rounded-lg hover:bg-cyber-cardBorder">
+          <i data-lucide="x" class="w-5 h-5"></i>
+        </button>
+      </div>
+
+      <!-- Form -->
+      <form id="addNewsForm" class="space-y-4">
+        
+        <!-- Title / Headline -->
+        <div>
+          <label class="block text-xs font-mono text-slate-300 uppercase tracking-wider mb-1.5">
+            HEADLINE / TITLE <span class="text-cyber-redline">*</span>
+          </label>
+          <input type="text" id="articleTitle" required 
+            placeholder="e.g. Secret NASA Satellite Records Massive Energy Burst Near Jupiter" 
+            class="w-full bg-cyber-black border border-cyber-cardBorder focus:border-cyber-cyan rounded-xl p-3 text-sm text-slate-100 font-sans outline-none transition-all">
+        </div>
+
+        <!-- Platform Source & Author -->
+        <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+          <div>
+            <label class="block text-xs font-mono text-slate-300 uppercase tracking-wider mb-1.5">
+              SOURCE PLATFORM
+            </label>
+            <select id="articlePlatform" class="w-full bg-cyber-black border border-cyber-cardBorder focus:border-cyber-cyan rounded-xl p-3 text-sm text-slate-100 font-mono outline-none">
+              <option value="twitter">Twitter / X Post</option>
+              <option value="reddit">Reddit Thread</option>
+              <option value="news" selected>Breaking News Wire</option>
+              <option value="tiktok">Viral Media / Video</option>
+              <option value="tech">Tech / AI Dispatch</option>
+            </select>
+          </div>
+          <div>
+            <label class="block text-xs font-mono text-slate-300 uppercase tracking-wider mb-1.5">
+              AUTHOR / HANDLE
+            </label>
+            <input type="text" id="articleAuthor" placeholder="e.g. @SpaceCommander or u/AstroNews" 
+              class="w-full bg-cyber-black border border-cyber-cardBorder focus:border-cyber-cyan rounded-xl p-3 text-sm text-slate-100 font-mono outline-none">
+          </div>
+        </div>
+
+        <!-- Content Body -->
+        <div>
+          <label class="block text-xs font-mono text-slate-300 uppercase tracking-wider mb-1.5">
+            CONTENT / POST TRANSCRIPT <span class="text-cyber-redline">*</span>
+          </label>
+          <textarea id="articleContent" rows="4" required 
+            placeholder="Paste the full text, comments, or report details here. The virality algorithm uses this to calculate RPM and impact!" 
+            class="w-full bg-cyber-black border border-cyber-cardBorder focus:border-cyber-cyan rounded-xl p-3 text-sm text-slate-100 font-sans outline-none resize-none"></textarea>
+        </div>
+
+        <!-- Image Input: Dual mode (URL or File Upload) -->
+        <div class="space-y-2">
+          <label class="block text-xs font-mono text-slate-300 uppercase tracking-wider">
+            ATTACH IMAGE WITH ARTICLE
+          </label>
+          
+          <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+            <div>
+              <input type="url" id="articleImageUrl" placeholder="Paste Image URL (https://...)" 
+                class="w-full bg-cyber-black border border-cyber-cardBorder focus:border-cyber-cyan rounded-xl p-3 text-xs text-slate-100 font-mono outline-none">
+            </div>
+            
+            <div class="relative">
+              <input type="file" id="articleImageFile" accept="image/*" class="hidden">
+              <label for="articleImageFile" class="w-full h-full min-h-[42px] flex items-center justify-center gap-2 bg-cyber-dark hover:bg-slate-800 border border-dashed border-slate-600 hover:border-cyber-cyan rounded-xl px-3 py-2 text-xs font-mono text-slate-300 cursor-pointer transition-all">
+                <i data-lucide="upload" class="w-4 h-4 text-cyber-cyan"></i>
+                <span id="fileUploadLabel">Upload Local Image</span>
+              </label>
+            </div>
+          </div>
+
+          <!-- Quick Image Presets -->
+          <div class="flex items-center gap-2 pt-1">
+            <span class="text-[10px] font-mono text-slate-500">QUICK SAMPLES:</span>
+            <button type="button" class="img-preset-btn text-[11px] font-mono text-cyber-cyan hover:underline" data-img="https://images.unsplash.com/photo-1518770660439-4636190af475?w=800&auto=format&fit=crop&q=80">Cyber Chip</button>
+            <span class="text-slate-600">•</span>
+            <button type="button" class="img-preset-btn text-[11px] font-mono text-cyber-cyan hover:underline" data-img="https://images.unsplash.com/photo-1451187580459-43490279c0fa?w=800&auto=format&fit=crop&q=80">Deep Space</button>
+            <span class="text-slate-600">•</span>
+            <button type="button" class="img-preset-btn text-[11px] font-mono text-cyber-cyan hover:underline" data-img="https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?w=800&auto=format&fit=crop&q=80">Neon Wave</button>
+            <span class="text-slate-600">•</span>
+            <button type="button" class="img-preset-btn text-[11px] font-mono text-cyber-cyan hover:underline" data-img="https://images.unsplash.com/photo-1526374965328-7f61d4dc18c5?w=800&auto=format&fit=crop&q=80">Code Matrix</button>
+          </div>
+
+          <!-- Image Preview -->
+          <div id="imagePreviewContainer" class="hidden relative rounded-xl overflow-hidden border border-cyber-cardBorder max-h-48 bg-cyber-black">
+            <img id="imagePreview" src="" alt="Preview" class="w-full h-44 object-cover">
+            <button type="button" id="removeImageBtn" class="absolute top-2 right-2 bg-red-600 hover:bg-red-700 text-white p-1 rounded-md text-xs" title="Remove Image">
+              <i data-lucide="trash-2" class="w-3.5 h-3.5"></i>
+            </button>
+          </div>
+        </div>
+
+        <!-- Live Estimate RPM Box -->
+        <div class="bg-cyber-black/70 border border-cyber-cardBorder/70 rounded-xl p-3 flex items-center justify-between">
+          <div class="flex items-center gap-2">
+            <i data-lucide="gauge" class="w-4 h-4 text-cyber-cyan"></i>
+            <span class="text-xs font-mono text-slate-300">ESTIMATED ENGINE RPM:</span>
+          </div>
+          <span class="font-gauge text-sm font-bold text-cyber-cyan" id="modalEstimateRPM">--- RPM</span>
+        </div>
+
+        <!-- Submit Button -->
+        <div class="flex items-center justify-end gap-3 pt-3 border-t border-cyber-cardBorder">
+          <button type="button" id="cancelAddNewsBtn" class="px-5 py-2.5 rounded-xl bg-cyber-dark hover:bg-slate-800 text-slate-300 text-xs font-mono">
+            CANCEL
+          </button>
+          <button type="submit" class="px-6 py-2.5 rounded-xl bg-gradient-to-r from-cyber-cyan to-cyber-neonBlue hover:from-cyan-300 hover:to-blue-400 text-black font-display font-bold text-xs uppercase tracking-wider shadow-neon-cyan">
+            PUBLISH DISPATCH
+          </button>
+        </div>
+
+      </form>
+
+    </div>
+  </div>
+
+  <!-- 2. DEVELOPER OPTION ACCESS MODAL (NO HINTS) -->
+  <div id="devModal" class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/85 backdrop-blur-md hidden transition-opacity">
+    <div class="relative w-full max-w-md bg-cyber-card border border-amber-500/40 rounded-3xl p-6 sm:p-7 shadow-[0_0_50px_rgba(245,158,11,0.2)]">
+      
+      <!-- Modal Header -->
+      <div class="flex items-center justify-between pb-4 mb-4 border-b border-cyber-cardBorder">
+        <div class="flex items-center gap-2.5">
+          <div class="p-2 rounded-xl bg-amber-500/10 border border-amber-500/30 text-amber-400">
+            <i data-lucide="terminal" class="w-5 h-5"></i>
+          </div>
+          <div>
+            <h3 class="font-display font-black text-lg uppercase tracking-widest text-white">DEVELOPER GATEWAY</h3>
+            <p class="text-[11px] font-mono text-slate-400">AUTHENTICATED PERSONNEL ONLY</p>
+          </div>
+        </div>
+        <button id="closeDevModalBtn" class="text-slate-400 hover:text-white p-1.5 rounded-lg hover:bg-cyber-cardBorder">
+          <i data-lucide="x" class="w-5 h-5"></i>
+        </button>
+      </div>
+
+      <!-- Developer Access Form (Strictly No Hints) -->
+      <form id="devAuthForm" class="space-y-4">
+        <div>
+          <label class="block text-xs font-mono text-slate-300 uppercase tracking-widest mb-1.5 flex items-center justify-between">
+            <span>ENTER ACCESS CODE</span>
+            <span class="text-[10px] text-red-400 font-mono">STRICT ACCESS</span>
+          </label>
+          
+          <div class="relative">
+            <input type="password" id="devCodeInput" maxlength="12" autocomplete="off"
+              placeholder="••••"
+              class="w-full bg-cyber-black border border-slate-700 focus:border-amber-400 focus:ring-1 focus:ring-amber-400 rounded-xl p-3.5 text-center text-xl font-mono tracking-[0.5em] text-amber-300 outline-none">
+          </div>
+        </div>
+
+        <!-- Error Alert Container (Empty initially) -->
+        <div id="devAuthError" class="hidden p-3 rounded-xl bg-red-500/10 border border-red-500/40 text-red-400 text-xs font-mono flex items-center gap-2">
+          <i data-lucide="alert-octagon" class="w-4 h-4 flex-shrink-0"></i>
+          <span id="devAuthErrorText">ACCESS DENIED. INVALID PASSKEY.</span>
+        </div>
+
+        <!-- Action Button -->
+        <div class="pt-2">
+          <button type="submit" class="w-full py-3 rounded-xl bg-gradient-to-r from-amber-500 to-yellow-500 hover:from-amber-400 hover:to-yellow-400 text-black font-display font-black tracking-widest text-sm uppercase shadow-lg shadow-amber-500/25 transition-all">
+            VERIFY CREDENTIALS
+          </button>
+        </div>
+      </form>
+
+      <div class="mt-4 pt-3 border-t border-cyber-cardBorder/60 text-center">
+        <span class="text-[10px] font-mono text-slate-600 uppercase tracking-widest">
+          SECURITY PROTOCOL LEVEL 4 // ENCRYPTED SESSION
+        </span>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- 3. REAL-TIME MODERATION DASHBOARD MODAL FOR ADMINISTRATOR -->
+  <div id="adminDashboardModal" class="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-6 bg-black/90 backdrop-blur-xl hidden">
+    <div class="relative w-full max-w-6xl bg-cyber-dark border border-cyber-redline/60 rounded-3xl shadow-[0_0_60px_rgba(255,8,68,0.25)] flex flex-col max-h-[92vh] overflow-hidden">
+      
+      <!-- Dashboard Top Header Bar -->
+      <div class="p-5 sm:p-6 border-b border-cyber-cardBorder bg-cyber-card flex flex-wrap items-center justify-between gap-4">
+        <div class="flex items-center gap-3">
+          <div class="p-3 rounded-2xl bg-red-500/10 border border-cyber-redline/40 text-cyber-redline">
+            <i data-lucide="shield-check" class="w-6 h-6"></i>
+          </div>
+          <div>
+            <div class="flex items-center gap-2">
+              <h2 class="font-display font-black text-xl text-white tracking-wider uppercase">REAL-TIME MODERATION COCKPIT</h2>
+              <span class="px-2 py-0.5 rounded bg-red-500/20 text-cyber-redline text-[10px] font-mono font-bold border border-red-500/30">ADMINISTRATOR</span>
+              <span class="flex h-2 w-2 relative">
+                <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>
+                <span class="relative inline-flex rounded-full h-2 w-2 bg-emerald-500"></span>
+              </span>
+            </div>
+            <p class="text-xs font-mono text-slate-400">Live content stream, purge authorization & telemetry controls</p>
+          </div>
+        </div>
+
+        <div class="flex items-center gap-3">
+          <!-- Refresh Feed -->
+          <button id="adminRefreshBtn" class="p-2.5 rounded-xl bg-cyber-card hover:bg-cyber-cardBorder border border-cyber-cardBorder text-slate-300 hover:text-white text-xs font-mono flex items-center gap-1.5" title="Refresh Live Data">
+            <i data-lucide="refresh-cw" class="w-4 h-4"></i>
+            <span class="hidden sm:inline">SYNC</span>
+          </button>
+
+          <!-- Simulate Live Viral Spike -->
+          <button id="adminSimulateSpikeBtn" class="px-3 py-2 rounded-xl bg-cyber-orange/15 hover:bg-cyber-orange/25 border border-cyber-orange/40 text-cyber-orange text-xs font-mono font-bold flex items-center gap-1.5">
+            <i data-lucide="zap" class="w-4 h-4"></i>
+            <span>INJECT SPIKE</span>
+          </button>
+
+          <!-- Close Dashboard -->
+          <button id="closeAdminDashBtn" class="p-2.5 rounded-xl bg-cyber-card hover:bg-cyber-cardBorder border border-cyber-cardBorder text-slate-400 hover:text-white">
+            <i data-lucide="x" class="w-5 h-5"></i>
+          </button>
+        </div>
+      </div>
+
+      <!-- Dashboard Body: Tabs & Live Metrics -->
+      <div class="p-5 sm:p-6 space-y-6 overflow-y-auto flex-1">
+        
+        <!-- Live Real-Time Telemetry Counters -->
+        <div class="grid grid-cols-2 lg:grid-cols-4 gap-4">
+          
+          <div class="bg-cyber-card border border-cyber-cardBorder rounded-2xl p-4">
+            <div class="flex items-center justify-between text-slate-400 text-xs font-mono">
+              <span>TOTAL DISPATCHES</span>
+              <i data-lucide="database" class="w-4 h-4 text-cyber-cyan"></i>
+            </div>
+            <div class="font-gauge text-2xl font-bold text-white mt-1" id="dashTotalArticles">0</div>
+            <div class="text-[10px] text-slate-500 font-mono mt-1">Live in persistent storage</div>
+          </div>
+
+          <div class="bg-cyber-card border border-cyber-cardBorder rounded-2xl p-4">
+            <div class="flex items-center justify-between text-slate-400 text-xs font-mono">
+              <span>REDLINE POSTS</span>
+              <i data-lucide="flame" class="w-4 h-4 text-cyber-redline"></i>
+            </div>
+            <div class="font-gauge text-2xl font-bold text-cyber-redline mt-1" id="dashRedlineCount">0</div>
+            <div class="text-[10px] text-slate-500 font-mono mt-1">Virality &gt; 8,000 RPM</div>
+          </div>
+
+          <div class="bg-cyber-card border border-cyber-cardBorder rounded-2xl p-4">
+            <div class="flex items-center justify-between text-slate-400 text-xs font-mono">
+              <span>AVERAGE VELOCITY</span>
+              <i data-lucide="gauge" class="w-4 h-4 text-cyber-neonBlue"></i>
+            </div>
+            <div class="font-gauge text-2xl font-bold text-cyber-neonBlue mt-1" id="dashAvgRPM">0 RPM</div>
+            <div class="text-[10px] text-slate-500 font-mono mt-1">Engine throughput</div>
+          </div>
+
+          <div class="bg-cyber-card border border-cyber-cardBorder rounded-2xl p-4">
+            <div class="flex items-center justify-between text-slate-400 text-xs font-mono">
+              <span>MODERATION ACTIONS</span>
+              <i data-lucide="trash-2" class="w-4 h-4 text-cyber-orange"></i>
+            </div>
+            <div class="font-gauge text-2xl font-bold text-cyber-orange mt-1" id="dashDeletedCount">0</div>
+            <div class="text-[10px] text-slate-500 font-mono mt-1">Articles purged or filtered</div>
+          </div>
+
+        </div>
+
+        <!-- Moderation Table Section -->
+        <div class="bg-cyber-card border border-cyber-cardBorder rounded-2xl p-5 space-y-4">
+          
+          <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+            <div class="flex items-center gap-2">
+              <i data-lucide="list-filter" class="w-4 h-4 text-cyber-cyan"></i>
+              <h3 class="font-display font-bold text-base text-white uppercase tracking-wider">LIVE CONTENT MODERATION QUEUE</h3>
+            </div>
+
+            <!-- Quick Bulk Action -->
+            <div class="flex items-center gap-2">
+              <button id="adminPurgeAllBtn" class="px-3 py-1.5 rounded-lg bg-red-950/40 hover:bg-red-900/60 border border-red-800/80 text-red-300 text-xs font-mono font-bold flex items-center gap-1.5 transition-all">
+                <i data-lucide="alert-triangle" class="w-3.5 h-3.5"></i>
+                <span>RESET DEMO DATA</span>
+              </button>
+            </div>
+          </div>
+
+          <!-- Moderation Table -->
+          <div class="overflow-x-auto">
+            <table class="w-full text-left text-xs font-mono">
+              <thead class="bg-cyber-black text-slate-400 border-b border-cyber-cardBorder uppercase text-[10px] tracking-wider">
+                <tr>
+                  <th class="py-3 px-4">DISPATCH</th>
+                  <th class="py-3 px-4">SOURCE</th>
+                  <th class="py-3 px-4">RPM VELOCITY</th>
+                  <th class="py-3 px-4">BULLET CLASS</th>
+                  <th class="py-3 px-4">TIMESTAMP</th>
+                  <th class="py-3 px-4 text-right">ADMIN ACTION</th>
+                </tr>
+              </thead>
+              <tbody id="adminModerationTableBody" class="divide-y divide-cyber-cardBorder/60">
+                <!-- Injected via admin.js -->
+              </tbody>
+            </table>
+          </div>
+
+        </div>
+
+        <!-- Real-Time Activity / Audit Stream -->
+        <div class="bg-cyber-card border border-cyber-cardBorder rounded-2xl p-5 space-y-3">
+          <div class="flex items-center justify-between">
+            <div class="flex items-center gap-2">
+              <i data-lucide="activity" class="w-4 h-4 text-emerald-400"></i>
+              <h3 class="font-display font-bold text-sm text-white uppercase tracking-wider">REAL-TIME AUDIT LOG</h3>
+            </div>
+            <span class="text-[10px] font-mono text-slate-500">BROADCAST CHANNEL SYNC</span>
+          </div>
+
+          <div id="adminAuditLog" class="h-36 overflow-y-auto font-mono text-xs space-y-2 p-3 bg-cyber-black/70 rounded-xl border border-cyber-cardBorder">
+            <!-- Logs injected dynamically -->
+          </div>
+        </div>
+
+      </div>
+
+      <!-- Dashboard Footer -->
+      <div class="p-4 border-t border-cyber-cardBorder bg-cyber-card flex items-center justify-between text-xs font-mono">
+        <span class="text-slate-400">SESSION: <strong class="text-cyber-cyan">AUTHENTICATED (CODE 1412)</strong></span>
+        <button id="adminExitLockBtn" class="flex items-center gap-1.5 px-4 py-2 rounded-xl bg-red-600 hover:bg-red-700 text-white font-bold transition-all">
+          <i data-lucide="lock" class="w-3.5 h-3.5"></i>
+          <span>EXIT & LOCK ADMIN MODE</span>
+        </button>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- Toast Notification Container -->
+  <div id="toastContainer" class="fixed top-24 right-6 z-50 space-y-2 pointer-events-none"></div>
+
+  <!-- Core JavaScript Modules -->
+  <script src="js/audio.js"></script>
+  <script src="js/gauge.js"></script>
+  <script src="js/analyzer.js"></script>
+  <script src="js/store.js"></script>
+  <script src="js/admin.js"></script>
+  <script src="js/app.js"></script>
+
+  <script>
+    // Initialize Lucide icons on DOM ready
+    document.addEventListener('DOMContentLoaded', () => {
+      if (window.lucide) {
+        window.lucide.createIcons();
+      }
+    });
+  </script>
+</body>
+</html>
